@@ -265,6 +265,15 @@ ZoneConnection = LocalCharacter.ChildAdded:Connect(function(child)
     end
 end)
 
+local backValues = {}
+-- // Show Backpack Item Names == 
+for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do 
+    if v.Name == "Sundial Totem" then
+        table.insert(backValues, v.Name)
+    end
+end
+
+
 -- // Find TpSpots // --
 local TpSpotsFolder = Workspace:FindFirstChild("world"):WaitForChild("spawns"):WaitForChild("TpSpots")
 for i, v in pairs(TpSpotsFolder:GetChildren()) do
@@ -378,56 +387,6 @@ NoclipConnection = RunService.Stepped:Connect(function()
     end
 end)
 
--- // // // Dupe // // // --
-local DupeEnabled = false
-local DupeConnection
-local function autoDupe()
-    local hud = LocalPlayer.PlayerGui:FindFirstChild("hud")
-    if hud then
-        local safezone = hud:FindFirstChild("safezone")
-        if safezone then
-            local bodyAnnouncements = safezone:FindFirstChild("bodyannouncements")
-            if bodyAnnouncements then
-                local offerFrame = bodyAnnouncements:FindFirstChild("offer")
-                if offerFrame and offerFrame:FindFirstChild("confirm") then
-                    firesignal(offerFrame.confirm.MouseButton1Click)
-                end
-            end
-        end
-    end
-end
-
-local function startAutoDupe()
-    if DupeConnection or not DupeEnabled then return end
-    DupeConnection = RunService.RenderStepped:Connect(autoDupe)
-end
-
-local function stopAutoDupe()
-    if DupeConnection then
-        DupeConnection:Disconnect()
-        DupeConnection = nil
-    end
-end
-
-PlayerGui.DescendantAdded:Connect(function(descendant)
-    if DupeEnabled and descendant.Name == "confirm" and descendant.Parent and descendant.Parent.Name == "offer" then
-        local hud = LocalPlayer.PlayerGui:FindFirstChild("hud")
-        if hud then
-            local safezone = hud:FindFirstChild("safezone")
-            if safezone then
-                local bodyAnnouncements = safezone:FindFirstChild("bodyannouncements")
-                if bodyAnnouncements then
-                    local offerFrame = bodyAnnouncements:FindFirstChild("offer")
-                    if offerFrame and offerFrame:FindFirstChild("confirm") then
-                        firesignal(offerFrame.confirm.MouseButton1Click)
-                    end
-                end
-            end
-        end
-    end
-end)
-
-
 
 -- // // // Tabs Gui // // // --
 
@@ -442,15 +401,58 @@ local Tabs = { -- https://lucide.dev/icons/
 
 local Options = Fluent.Options
 
+
 do
     Tabs.Home:AddButton({
         Title = "Taijitu script tester",
     })
 
-    -- // Taijitu Test Tab // --
-    local sectionExclus = Tabs.Taijitu_Additions:AddSection("Exclusives Features")
-   
+    local sundialMode = Tabs.Main:AddDropdown("sundials", {
+        Title = "Backpack Items",
+        Values = backValues, 
+        Multi = false,
+        Default = "",
+    })
 
+    -- // Taijitu Test Tab // --
+    local sectionExclus = Tabs.Taijitu_Additions:AddSection("Taiji Features")
+ 
+    local autoSundial = Tabs.Main:AddToggle("autoSundial", {Title = "Auto Sundial", Default = false })
+    autoSundial:OnChanged(function()
+
+        while autoSundial.Value do
+
+            -- Check if the "Sundial Totem" exists in the player's backpack
+            for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                if v.Name == "Sundial Totem" then
+                    -- Equip the Sundial Totem if found
+                    game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
+                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, LocalPlayer, 0)
+                    break
+                end
+            end
+
+            wait(25)
+
+            for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                if v.Name == "Aurora Totem" then
+                    -- Equip the Sundial Totem if found
+                    game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
+                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, LocalPlayer, 0)
+                    break
+                end
+            end
+
+            local RodName = ReplicatedStorage.playerstats[LocalPlayer.Name].Stats.rod.Value
+            if LocalPlayer.Backpack:FindFirstChild(RodName) then
+                LocalPlayer.Character.Humanoid:EquipTool(LocalPlayer.Backpack:FindFirstChild(RodName))
+            end
+
+            -- Wait for 13 minutes before checking again
+             wait(700)
+        end
+    end)
+    
 
     -- // Main Tab // --
     local section = Tabs.Main:AddSection("Auto Fishing")
