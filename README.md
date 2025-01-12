@@ -8,7 +8,7 @@ and environment customization efficient and user-friendly.
 #### New Teleport Locations:
 
 - Grand Reef
-- Golden Pool: Discover hidden treasures.
+- Golden Pool
 
 #### Improved Teleport Dropdown: 
 
