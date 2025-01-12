@@ -273,6 +273,12 @@ for i, v in pairs(TpSpotsFolder:GetChildren()) do
     end
 end
 
+-- Sort teleportSpots alphabetically
+table.sort(teleportSpots, function(a, b)
+    return a:lower() < b:lower()
+end)
+
+
 -- // // // Get Position // // // --
 function GetPosition()
 	if not game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
