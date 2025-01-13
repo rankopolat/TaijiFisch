@@ -42,7 +42,7 @@ local RenderStepped = RunService.RenderStepped
 local WaitForSomeone = RenderStepped.Wait
 
 -- // // // Variables // // // --
-local CastMode = "Legit"
+local CastMode = "Blatant"
 local ShakeMode = "Navigation"
 local ReelMode = "Blatant"
 local CollectMode = "Teleports"
@@ -61,8 +61,6 @@ function ShowNotification(String)
         Duration = 5
     })
 end
-
--- // Sending Execution To Discord // --
 
 
 -- // // // Auto Cast // // // --
@@ -265,12 +263,11 @@ ZoneConnection = LocalCharacter.ChildAdded:Connect(function(child)
     end
 end)
 
+
 local backValues = {}
 -- // Show Backpack Item Names == 
 for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do 
-    if v.Name == "Sundial Totem" then
-        table.insert(backValues, v.Name)
-    end
+    table.insert(backValues, v.Name)
 end
 
 
@@ -407,7 +404,7 @@ do
         Title = "Taijitu script tester",
     })
 
-    local sundialMode = Tabs.Main:AddDropdown("sundials", {
+    local sundialMode = Tabs.Taijitu_Additions:AddDropdown("sundials", {
         Title = "Backpack Items",
         Values = backValues, 
         Multi = false,
@@ -417,7 +414,7 @@ do
     -- // Taijitu Test Tab // --
     local sectionExclus = Tabs.Taijitu_Additions:AddSection("Taiji Features")
  
-    local autoSundial = Tabs.Main:AddToggle("autoSundial", {Title = "Auto Sundial", Default = false })
+    local autoSundial = Tabs.Taijitu_Additions:AddToggle("autoSundial", {Title = "Auto Sundial", Default = false })
     autoSundial:OnChanged(function()
 
         while autoSundial.Value do
@@ -671,7 +668,7 @@ do
     end)
     local WorldEventTPDropdownUI = Tabs.Teleports:AddDropdown("WorldEventTPDropdownUI", {
         Title = "Select World Event",
-        Values = {"Strange Whirlpool", "Great Hammerhead Shark", "Great White Shark", "Whale Shark", "The Depths - Serpent"},
+        Values = {"Strange Whirlpool", "Great Hammerhead Shark", "Great White Shark", "Whale Shark", "The Depths - Serpent","Eternal Frostwhale","Ancient Algae"},
         Multi = false,
         Default = nil,
     })
@@ -706,6 +703,18 @@ do
             local WorldEvent = game.Workspace.zones.fishing:FindFirstChild("The Depths - Serpent")
             if not WorldEvent then WorldEventTPDropdownUI:SetValue(nil) return ShowNotification("Not found The Depths - Serpent") end
             HumanoidRootPart.CFrame = CFrame.new(game.Workspace.zones.fishing["The Depths - Serpent"].Position + offset)            -- The Depths - Serpent
+            WorldEventTPDropdownUI:SetValue(nil)
+        elseif SelectedWorldEvent == "Eternal Frostwhale" then
+            local offset = Vector3.new(25, 135, 25)
+            local WorldEvent = game.Workspace.zones.fishing:FindFirstChild("Eternal Frostwhale")
+            if not WorldEvent then WorldEventTPDropdownUI:SetValue(nil) return ShowNotification("Not found Eternal Frostwhale") end
+            HumanoidRootPart.CFrame = CFrame.new(game.Workspace.zones.fishing["Eternal Frostwhale"].Position + offset)            -- Eternal Frostwhale
+            WorldEventTPDropdownUI:SetValue(nil)
+        elseif SelectedWorldEvent == "Ancient Algae" then
+            local offset = Vector3.new(25, 135, 25)
+            local WorldEvent = game.Workspace.zones.fishing:FindFirstChild("Ancient Algae")
+            if not WorldEvent then WorldEventTPDropdownUI:SetValue(nil) return ShowNotification("Not found Ancient Algae") end
+            HumanoidRootPart.CFrame = CFrame.new(game.Workspace.zones.fishing["Ancient Algae"].Position + offset)            -- Ancient Algae
             WorldEventTPDropdownUI:SetValue(nil)
         end
     end)
@@ -786,7 +795,7 @@ do
 
     -- // Misc Tab // --
     local section = Tabs.Misc:AddSection("Misc")
-    local BypassRadar = Tabs.Misc:AddToggle("BypassRadar", {Title = "Bypass Fish Radar", Default = false })
+    local BypassRadar = Tabs.Misc:AddToggle("BypassRadar", {Title = "Fish Radar", Default = false })
     BypassRadar:OnChanged(function()
         for _, v in pairs(game:GetService("CollectionService"):GetTagged("radarTag")) do
 			if v:IsA("BillboardGui") or v:IsA("SurfaceGui") then
@@ -794,7 +803,7 @@ do
 			end
 		end
     end)
-    local BypassGPS = Tabs.Misc:AddToggle("BypassGPS", {Title = "Bypass GPS", Default = false })
+    local BypassGPS = Tabs.Misc:AddToggle("BypassGPS", {Title = "GPS", Default = false })
     BypassGPS:OnChanged(function()
         if Options.BypassGPS.Value == true then
             local XyzClone = game:GetService("ReplicatedStorage").resources.items.items.GPS.GPS.gpsMain.xyz:Clone()
@@ -842,28 +851,12 @@ do
 			end
         end
     end)
-    local HoldDuration = Tabs.Misc:AddToggle("HoldDuration", {Title = "Hold Duration 0 sec", Default = false })
-    HoldDuration:OnChanged(function()
-        if Options.HoldDuration.Value == true then
-            for i,v in ipairs(game:GetService("Workspace"):GetDescendants()) do
-                if v.ClassName == "ProximityPrompt" then
-                    v.HoldDuration = 0
-                end
-            end
-        end
-    end)
+
+
     local DisableOxygen = Tabs.Misc:AddToggle("DisableOxygen", {Title = "Disable Oxygen", Default = true })
     DisableOxygen:OnChanged(function()
         LocalPlayer.Character.client.oxygen.Disabled = Options.DisableOxygen.Value
     end)
-    Tabs.Misc:AddButton({
-        Title = "Copy XYZ",
-        Description = "Copy Clipboard",
-        Callback = function()
-            local XYZ = tostring(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
-            setclipboard("game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(" .. XYZ .. ")")
-        end
-    })
 
     local JustUI = Tabs.Misc:AddToggle("JustUI", {Title = "Show/Hide UIs", Default = true })
     JustUI:OnChanged(function()
