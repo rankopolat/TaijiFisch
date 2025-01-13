@@ -271,6 +271,12 @@ for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
 end
 
 
+local merchValues = {}
+--for _, child in ipairs(workspace.world.npcs["Merchant"]:GetChildren()) do
+   -- table.insert(merchValues, child.Name)
+--end
+
+
 -- // Find TpSpots // --
 local TpSpotsFolder = Workspace:FindFirstChild("world"):WaitForChild("spawns"):WaitForChild("TpSpots")
 for i, v in pairs(TpSpotsFolder:GetChildren()) do
@@ -413,42 +419,6 @@ do
 
     -- // Taijitu Test Tab // --
     local sectionExclus = Tabs.Taijitu_Additions:AddSection("Taiji Features")
- 
-    local autoSundial = Tabs.Taijitu_Additions:AddToggle("autoSundial", {Title = "Auto Sundial", Default = false })
-    autoSundial:OnChanged(function()
-
-        while autoSundial.Value do
-
-            -- Check if the "Sundial Totem" exists in the player's backpack
-            for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-                if v.Name == "Sundial Totem" then
-                    -- Equip the Sundial Totem if found
-                    game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
-                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, LocalPlayer, 0)
-                    break
-                end
-            end
-
-            wait(25)
-
-            for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-                if v.Name == "Aurora Totem" then
-                    -- Equip the Sundial Totem if found
-                    game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
-                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, LocalPlayer, 0)
-                    break
-                end
-            end
-
-            local RodName = ReplicatedStorage.playerstats[LocalPlayer.Name].Stats.rod.Value
-            if LocalPlayer.Backpack:FindFirstChild(RodName) then
-                LocalPlayer.Character.Humanoid:EquipTool(LocalPlayer.Backpack:FindFirstChild(RodName))
-            end
-
-            -- Wait for 13 minutes before checking again
-             wait(700)
-        end
-    end)
     
 
     -- // Main Tab // --
@@ -529,6 +499,79 @@ do
             end
         end
     end)
+
+
+    -- // TAIJITU TAB // --
+    local autoSundial = Tabs.Taijitu_Additions:AddToggle("autoSundial", {Title = "Auto Sundial", Default = false })
+    autoSundial:OnChanged(function()
+
+        while autoSundial.Value do
+
+            autoCastEnabled = false;
+            VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, LocalPlayer, 0)
+            wait(5)
+
+            -- Check if the "Sundial Totem" exists in the player's backpack
+            for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                if v.Name == "Sundial Totem" then
+                    -- Equip the Sundial Totem if found
+                    game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
+                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, LocalPlayer, 0)
+                    break
+                end
+            end
+
+            wait(25)
+
+            for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                if v.Name == "Aurora Totem" then
+                    -- Equip the Sundial Totem if found
+                    game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
+                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, LocalPlayer, 0)
+                    break
+                end
+            end
+
+            wait(5)
+
+            local RodName = ReplicatedStorage.playerstats[LocalPlayer.Name].Stats.rod.Value
+            if Options.autoSundial.Value == true then
+                autoCastEnabled = true
+                if LocalPlayer.Backpack:FindFirstChild(RodName) then
+                    LocalPlayer.Character.Humanoid:EquipTool(LocalPlayer.Backpack:FindFirstChild(RodName))
+                end
+                if LocalCharacter then
+                    local tool = LocalCharacter:FindFirstChildOfClass("Tool")
+                    if tool then
+                        local hasBobber = tool:FindFirstChild("bobber")
+                        if not hasBobber then
+                            local rod = LocalCharacter and LocalCharacter:FindFirstChildOfClass("Tool")
+                            if rod and rod:FindFirstChild("values") and string.find(rod.Name, "Rod") then
+                                task.wait(0.5)
+                                local Random = math.random(90, 99)
+                                rod.events.cast:FireServer(Random)
+                            end
+                        end
+                    end
+                    task.wait(1)
+                end
+            else
+                autoCastEnabled = false
+            end
+
+            -- Wait for 13 minutes before checking again
+             wait(700)
+        end
+    end)
+
+    -- Add a section for Merchant Methods in Fluent UI
+    -- local merchantSection = Tabs.Misc:AddSection("Merchant Methods")
+    -- local merchantDropdown = Tabs.Misc:AddDropdown("MerchantDropdown", {
+        -- Title = "Merchant Methods",
+        -- Values = merchValues, -- Start empty
+        -- Multi = false,
+        -- Default = nil,
+    -- })
 
     -- // Mode Tab // --
     local section = Tabs.Main:AddSection("Mode Fishing")
