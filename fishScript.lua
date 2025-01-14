@@ -272,9 +272,14 @@ end
 
 
 local merchValues = {}
---for _, child in ipairs(workspace.world.npcs["Merchant"]:GetChildren()) do
-   -- table.insert(merchValues, child.Name)
---end
+local npcsFolder = workspace:FindFirstChild("world") and workspace.world:FindFirstChild("npcs")
+if NpcFolder then
+    for _, child in ipairs(workspace.world.npcs["Marc Merchant"]:GetChildren()) do
+        table.insert(merchValues, child.Name)
+    end
+else
+    table.insert(merchValues, "No NPCs Found")
+end
 
 
 -- // Find TpSpots // --
@@ -360,14 +365,14 @@ function SellHand()
 end
 function SellAll()
     local currentPosition = HumanoidRootPart.CFrame
-    local sellPosition = CFrame.new(464, 151, 232)
+    local sellPosition = CFrame.new(465.8, 150.6, 228.2)
     local wasAutoFreezeActive = false
     if AutoFreeze then
         wasAutoFreezeActive = true
         AutoFreeze = false
     end
     HumanoidRootPart.CFrame = sellPosition
-    task.wait(0.5)
+    task.wait(1)
     workspace:WaitForChild("world"):WaitForChild("npcs"):WaitForChild("Marc Merchant"):WaitForChild("merchant"):WaitForChild("sellall"):InvokeServer()
     task.wait(1)
     HumanoidRootPart.CFrame = currentPosition
@@ -375,6 +380,11 @@ function SellAll()
         AutoFreeze = true
         rememberPosition()
     end
+end
+
+function testSell()
+    workspace.world.npcs["Marc Merchant"].merchant:InvokeServer()
+    task.wait(1)
 end
 
 -- // // // Noclip Stepped // // // --
@@ -409,6 +419,14 @@ do
     Tabs.Home:AddButton({
         Title = "Taijitu script tester",
     })
+
+    Tabs.Home:AddButton({
+        Title = "Test Sell", -- Button label
+        Callback = function()
+            testSell() -- Call the function when the button is clicked
+        end
+    })
+    
 
     local sundialMode = Tabs.Taijitu_Additions:AddDropdown("sundials", {
         Title = "Backpack Items",
@@ -502,14 +520,13 @@ do
 
 
     -- // TAIJITU TAB // --
-    local autoSundial = Tabs.Taijitu_Additions:AddToggle("autoSundial", {Title = "Auto Sundial", Default = false })
+    local autoSundial = Tabs.Taijitu_Additions:AddToggle("autoSundial", {Title = "Auto Aurora Switcher", Default = false })
     autoSundial:OnChanged(function()
 
-        while autoSundial.Value do
+        while Options.autoSundial.Value do
 
             autoCastEnabled = false;
-            VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, LocalPlayer, 0)
-            wait(5)
+            task.wait(5)
 
             -- Check if the "Sundial Totem" exists in the player's backpack
             for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
@@ -521,7 +538,7 @@ do
                 end
             end
 
-            wait(25)
+            task.wait(25)
 
             for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
                 if v.Name == "Aurora Totem" then
@@ -532,46 +549,46 @@ do
                 end
             end
 
-            wait(5)
+            task.wait(5)
 
             local RodName = ReplicatedStorage.playerstats[LocalPlayer.Name].Stats.rod.Value
-            if Options.autoSundial.Value == true then
-                autoCastEnabled = true
-                if LocalPlayer.Backpack:FindFirstChild(RodName) then
-                    LocalPlayer.Character.Humanoid:EquipTool(LocalPlayer.Backpack:FindFirstChild(RodName))
-                end
-                if LocalCharacter then
-                    local tool = LocalCharacter:FindFirstChildOfClass("Tool")
-                    if tool then
-                        local hasBobber = tool:FindFirstChild("bobber")
-                        if not hasBobber then
-                            local rod = LocalCharacter and LocalCharacter:FindFirstChildOfClass("Tool")
-                            if rod and rod:FindFirstChild("values") and string.find(rod.Name, "Rod") then
-                                task.wait(0.5)
-                                local Random = math.random(90, 99)
-                                rod.events.cast:FireServer(Random)
-                            end
+            autoCastEnabled = true
+            if LocalPlayer.Backpack:FindFirstChild(RodName) then
+                LocalPlayer.Character.Humanoid:EquipTool(LocalPlayer.Backpack:FindFirstChild(RodName))
+            end
+            if LocalCharacter then
+                local tool = LocalCharacter:FindFirstChildOfClass("Tool")
+                if tool then
+                    local hasBobber = tool:FindFirstChild("bobber")
+                    if not hasBobber then
+                        local rod = LocalCharacter and LocalCharacter:FindFirstChildOfClass("Tool")
+                        if rod and rod:FindFirstChild("values") and string.find(rod.Name, "Rod") then
+                            task.wait(0.5)
+                            local Random = math.random(90, 99)
+                            rod.events.cast:FireServer(Random)
                         end
                     end
-                    task.wait(1)
                 end
-            else
-                autoCastEnabled = false
+                task.wait(1)
             end
-
+            
             -- Wait for 13 minutes before checking again
              wait(700)
+             autoCastEnabled = false;
+
         end
+        autoCastEnabled = false;
+
     end)
 
     -- Add a section for Merchant Methods in Fluent UI
-    -- local merchantSection = Tabs.Misc:AddSection("Merchant Methods")
-    -- local merchantDropdown = Tabs.Misc:AddDropdown("MerchantDropdown", {
-        -- Title = "Merchant Methods",
-        -- Values = merchValues, -- Start empty
-        -- Multi = false,
-        -- Default = nil,
-    -- })
+     local merchantSection = Tabs.Misc:AddSection("Merchant Methods")
+     local merchantDropdown = Tabs.Misc:AddDropdown("MerchantDropdown", {
+         Title = "Merchant Methods",
+         Values = merchValues, -- Start empty
+         Multi = false,
+         Default = nil,
+     })
 
     -- // Mode Tab // --
     local section = Tabs.Main:AddSection("Mode Fishing")
