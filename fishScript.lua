@@ -429,8 +429,8 @@ do
     
 
     local sundialMode = Tabs.Taijitu_Additions:AddDropdown("sundials", {
-        Title = "Backpack Items",
-        Values = backValues, 
+        Title = game:GetService("Lighting").TimeOfDay,
+        Values = backValues,
         Multi = false,
         Default = "",
     })
@@ -520,10 +520,41 @@ do
 
 
     -- // TAIJITU TAB // --
-    local autoSundial = Tabs.Taijitu_Additions:AddToggle("autoSundial", {Title = "Auto Aurora Switcher", Default = false })
+
+
+    local Lighting = game:GetService("Lighting")
+
+    -- Function to convert "HH:MM:SS" to total seconds
+    local function timeToSeconds(timeString)
+        local hours, minutes, seconds = timeString:match("(%d+):(%d+):(%d+)")
+        return tonumber(hours) * 3600 + tonumber(minutes) * 60 + tonumber(seconds)
+    end
+    
+    -- Function to check if TimeOfDay is within a range
+    local function isTimeBetween(startTime, endTime)
+        local currentSeconds = timeToSeconds(Lighting.TimeOfDay)
+        local startSeconds = timeToSeconds(startTime)
+        local endSeconds = timeToSeconds(endTime)
+        return currentSeconds >= startSeconds and currentSeconds <= endSeconds
+    end
+
+    local autoSundial = Tabs.Taijitu_Additions:AddToggle("autoSundial", {Title = "Auto Aurora Switcher", Description = "Only use when its already time!",Default = false })
     autoSundial:OnChanged(function()
 
         while Options.autoSundial.Value do
+
+            --[[        
+            if isTimeBetween("19:00:00", "05:59:00") then
+                for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                    if v.Name == "Sundial Totem" then
+                        -- Equip the Sundial Totem if found
+                        game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
+                        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, LocalPlayer, 0)
+                        break
+                    end
+                end
+            end
+            ]]
 
             autoCastEnabled = false;
             task.wait(5)
@@ -572,9 +603,11 @@ do
                 task.wait(1)
             end
             
-            -- Wait for 13 minutes before checking again
-             wait(700)
-             autoCastEnabled = false;
+            while not isTimeBetween("06:00:00", "07:00:00") do
+                task.wait(1) -- Check every second
+            end
+
+            autoCastEnabled = false;
 
         end
         autoCastEnabled = false;
