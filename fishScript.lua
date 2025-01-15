@@ -334,23 +334,9 @@ function rememberPosition()
         end
     end)
 end
+
 function SellHand()
-    local currentPosition = HumanoidRootPart.CFrame
-    local sellPosition = CFrame.new(464, 151, 232)
-    local wasAutoFreezeActive = false
-    if AutoFreeze then
-        wasAutoFreezeActive = true
-        AutoFreeze = false
-    end
-    HumanoidRootPart.CFrame = sellPosition
-    task.wait(0.5)
-    workspace:WaitForChild("world"):WaitForChild("npcs"):WaitForChild("Marc Merchant"):WaitForChild("merchant"):WaitForChild("sell"):InvokeServer()
-    task.wait(1)
-    HumanoidRootPart.CFrame = currentPosition
-    if wasAutoFreezeActive then
-        AutoFreeze = true
-        rememberPosition()
-    end
+    local sellAllFunction = game:GetService("ReplicatedStorage").events.purchase:FireServer("Carbon Rod", "Rod")
 end
 
 function SellAll()
@@ -358,17 +344,6 @@ function SellAll()
     local result = sellAllFunction:InvokeServer()
 end
 
-function AppraiseItem()
-    local replicatedStorage = game:GetService("ReplicatedStorage")
-local fireFunction = replicatedStorage:WaitForChild("packages"):WaitForChild("Net"):WaitForChild("RF/AppraiseAnywhere"):WaitForChild("Fire")
-
-local result = fireFunction:InvokeServer()
-end
-
-function testSell()
-    workspace.world.npcs["Marc Merchant"].merchant:InvokeServer()
-    task.wait(1)
-end
 
 -- // // // Noclip Stepped // // // --
 NoclipConnection = RunService.Stepped:Connect(function()
@@ -386,7 +361,7 @@ end)
 
 -- // // // Tabs Gui // // // --
 
-local Tabs = { -- https://lucide.dev/icons/
+local Tabs = { 
     Home = Window:AddTab({ Title = "Home", Icon = "home" }),
     Taijitu_Additions = Window:AddTab({ Title = "Taijitu Tab", Icon = "heart" }),
     Main = Window:AddTab({ Title = "Main", Icon = "list" }),
@@ -488,22 +463,6 @@ do
 
 
     -- // TAIJITU TAB // --
-
-    local addMoney = Tabs.Taijitu_Additions:AddToggle("addMoney", {Title = "Auto addMoney", Description = "Disabled will get banned",Default = false })
-    addMoney:OnChanged(function()
-        
-        --[[
-        while Options.addMoney.Value do
-            wait(0.0001)
-            task.spawn(function()
-            while task.wait() do 
-                game:GetService("ReplicatedStorage").packages.Net["RE/DailyReward/Claim"]:FireServer() 
-            end
-        end)
-        ]]
-
-    end
-    end)
 
     local Lighting = game:GetService("Lighting")
 
