@@ -6,10 +6,10 @@ local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.
 local Window = Fluent:CreateWindow({
     Title = game:GetService("MarketplaceService"):GetProductInfo(16732694052).Name .." | Taijitu Tester",
     SubTitle = "Ying & Yang",
-    TabWidth = 160,
+    TabWidth = 120,
     Size = UDim2.fromOffset(580, 460),
     Acrylic = false, 
-    Theme = "Blue",
+    Theme = "Dark",
     MinimizeKey = Enum.KeyCode.LeftAlt
 })
 
@@ -271,17 +271,6 @@ for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
 end
 
 
-local merchValues = {}
-local npcsFolder = workspace:FindFirstChild("world") and workspace.world:FindFirstChild("npcs")
-if NpcFolder then
-    for _, child in ipairs(workspace.world.npcs["Marc Merchant"]:GetChildren()) do
-        table.insert(merchValues, child.Name)
-    end
-else
-    table.insert(merchValues, "No NPCs Found")
-end
-
-
 -- // Find TpSpots // --
 local TpSpotsFolder = Workspace:FindFirstChild("world"):WaitForChild("spawns"):WaitForChild("TpSpots")
 for i, v in pairs(TpSpotsFolder:GetChildren()) do
@@ -363,23 +352,17 @@ function SellHand()
         rememberPosition()
     end
 end
+
 function SellAll()
-    local currentPosition = HumanoidRootPart.CFrame
-    local sellPosition = CFrame.new(465.8, 150.6, 228.2)
-    local wasAutoFreezeActive = false
-    if AutoFreeze then
-        wasAutoFreezeActive = true
-        AutoFreeze = false
-    end
-    HumanoidRootPart.CFrame = sellPosition
-    task.wait(1)
-    workspace:WaitForChild("world"):WaitForChild("npcs"):WaitForChild("Marc Merchant"):WaitForChild("merchant"):WaitForChild("sellall"):InvokeServer()
-    task.wait(1)
-    HumanoidRootPart.CFrame = currentPosition
-    if wasAutoFreezeActive then
-        AutoFreeze = true
-        rememberPosition()
-    end
+    local sellAllFunction = game:GetService("ReplicatedStorage"):WaitForChild("events"):WaitForChild("SellAll")
+    local result = sellAllFunction:InvokeServer()
+end
+
+function AppraiseItem()
+    local replicatedStorage = game:GetService("ReplicatedStorage")
+local fireFunction = replicatedStorage:WaitForChild("packages"):WaitForChild("Net"):WaitForChild("RF/AppraiseAnywhere"):WaitForChild("Fire")
+
+local result = fireFunction:InvokeServer()
 end
 
 function testSell()
@@ -418,21 +401,6 @@ local Options = Fluent.Options
 do
     Tabs.Home:AddButton({
         Title = "Taijitu script tester",
-    })
-
-    Tabs.Home:AddButton({
-        Title = "Test Sell", -- Button label
-        Callback = function()
-            testSell() -- Call the function when the button is clicked
-        end
-    })
-    
-
-    local sundialMode = Tabs.Taijitu_Additions:AddDropdown("sundials", {
-        Title = game:GetService("Lighting").TimeOfDay,
-        Values = backValues,
-        Multi = false,
-        Default = "",
     })
 
     -- // Taijitu Test Tab // --
@@ -521,6 +489,21 @@ do
 
     -- // TAIJITU TAB // --
 
+    local addMoney = Tabs.Taijitu_Additions:AddToggle("addMoney", {Title = "Auto addMoney", Description = "Disabled will get banned",Default = false })
+    addMoney:OnChanged(function()
+        
+        --[[
+        while Options.addMoney.Value do
+            wait(0.0001)
+            task.spawn(function()
+            while task.wait() do 
+                game:GetService("ReplicatedStorage").packages.Net["RE/DailyReward/Claim"]:FireServer() 
+            end
+        end)
+        ]]
+
+    end
+    end)
 
     local Lighting = game:GetService("Lighting")
 
@@ -537,6 +520,7 @@ do
         local endSeconds = timeToSeconds(endTime)
         return currentSeconds >= startSeconds and currentSeconds <= endSeconds
     end
+
 
     local autoSundial = Tabs.Taijitu_Additions:AddToggle("autoSundial", {Title = "Auto Aurora Switcher", Description = "Only use when its already time!",Default = false })
     autoSundial:OnChanged(function()
@@ -618,7 +602,7 @@ do
      local merchantSection = Tabs.Misc:AddSection("Merchant Methods")
      local merchantDropdown = Tabs.Misc:AddDropdown("MerchantDropdown", {
          Title = "Merchant Methods",
-         Values = merchValues, -- Start empty
+         Values = {}, -- Start empty
          Multi = false,
          Default = nil,
      })
