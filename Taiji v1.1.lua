@@ -1,12 +1,14 @@
 local rodsConst = loadstring(game:HttpGet("https://raw.githubusercontent.com/rankopolat/TaijiFisch/refs/heads/main/rodsConst.lua"))()
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local start_time = os.time() -- Record the start time
+local elapsed_time = 0
 
 local Window = Rayfield:CreateWindow({
     Name = "Taiji v1.1",
     Icon = 0,
     LoadingTitle = "Taiji v1.1 interfacce",
     LoadingSubtitle = "by Taijitu",
-    Theme = "Default",
+    Theme = "Serenity",
  
     DisableRayfieldPrompts = false,
     DisableBuildWarnings = false, 
@@ -26,8 +28,8 @@ local Window = Rayfield:CreateWindow({
 
 local Home = Window:CreateTab("Home","home")
 local Main = Window:CreateTab("Auto","list")
-local Taijitu_Additions = Window:CreateTab("Taiji","heart")
-local Items = Window:CreateTab("Items","box")
+local Taiji = Window:CreateTab("Taiji","heart")
+local Shop = Window:CreateTab("Shop","box")
 local Teleports = Window:CreateTab("Teleports","map-pin")
 local Misc = Window:CreateTab("Misc","file-text")
 
@@ -71,6 +73,17 @@ local BypassGpsLoop = nil
 local Noclip = false
 local RunCount = false
 
+-- // TABLE FILLER // --
+for i, v in pairs(TpSpotsFolder:GetChildren()) do
+    if table.find(teleportSpots, v.Name) == nil then
+        table.insert(teleportSpots, v.Name)
+    end
+end
+
+table.sort(teleportSpots, function(a, b)
+    return a:lower() < b:lower()
+end)
+
 -- // // // Functions // // // --
 function ShowNotification(String)
     Fluent:Notify({
@@ -92,6 +105,19 @@ spawn(function()
     end
 end)
 
+
+ -- // // // Noclip Stepped // // // --
+ NoclipConnection = RunService.Stepped:Connect(function()
+    if Noclip == true then
+        if LocalCharacter ~= nil then
+            for i, v in pairs(LocalCharacter:GetDescendants()) do
+                if v:IsA("BasePart") and v.CanCollide == true then
+                    v.CanCollide = false
+                end
+            end
+        end
+    end
+end)
 
 -- // // // Auto Cast // // // --
 local autoCastEnabled = false
@@ -195,6 +221,7 @@ if autoShakeEnabled and PlayerGui:FindFirstChild("shakeui") and PlayerGui.shakeu
     startAutoShake()
 end
 
+
 -- // // // Auto Reel // // // --
 local autoReelEnabled = true
 local PerfectCatchEnabled = true
@@ -267,6 +294,16 @@ if autoReelEnabled and PlayerGui:FindFirstChild("reel") and
 end
 
 
+function SellAll()
+    local sellAllFunction = game:GetService("ReplicatedStorage"):WaitForChild("events"):WaitForChild("SellAll")
+    local result = sellAllFunction:InvokeServer()
+end
+
+function Enchant()
+    game:GetService("ReplicatedStorage"):WaitForChild("events"):WaitForChild("enchant"):InvokeServer()
+end
+
+local timeLabel = Home:CreateLabel(elapsed_time, "heart", Color3.fromRGB(255, 255, 255), false)
 
 -- // // // // // AUTO FISH SECTION // // // // // --
 local autoFishSection = Main:CreateSection("Auto Fishing Toggles")
@@ -502,3 +539,309 @@ Teleports:CreateButton({
         HumanoidRootPart.CFrame = CFrame.new(20023.6,512.4,5431)
     end,
  })
+
+
+ Teleports:CreateSection("Teleport zones")
+ local Dropdown = Main:CreateDropdown({
+    Name = "Auto Shake Mode",
+    Options = {"Navigation", "Mouse"},
+    CurrentOption = {ShakeMode},
+    MultipleOptions = false, -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(CurrentOption)
+        ShakeMode = CurrentOption[1]
+     end,
+ })
+
+local setTPSpot = nil
+local IslandTPDropdownUI = Teleports:CreateDropdown({
+    Name = "Teleport Spawns",
+    Options = teleportSpots,
+    CurrentOption = nil,
+    MultipleOptions = false,
+    Callback = function(CurrentOption)
+        setTPSpot = CurrentOption[1]
+     end,
+})
+
+Teleports:CreateButton({
+    Name = "Teleport",
+    Callback = function()
+        HumanoidRootPart.CFrame = TpSpotsFolder:FindFirstChild(setTPSpot).CFrame + Vector3.new(0, 5, 0)
+        IslandTPDropdownUI:SetValue(nil)
+    end,
+ })
+
+Teleports:CreateSection("Totem Teleports")
+Teleports:CreateDropdown({
+    Name = "Select Totem",
+    Options = {"Aurora", "Sundial", "Windset", "Smokescreen", "Tempest"},
+    CurrentOption = nil,
+    MultipleOptions = false,
+    Callback = function(CurrentOption)
+        SelectedTotem = CurrentOption[1]
+     end,
+})
+Teleports:CreateButton({
+    Name = "Teleport",
+    Callback = function()
+    if SelectedTotem == "Aurora" then
+        HumanoidRootPart.CFrame = CFrame.new(-1811, -137, -3282)
+        TotemTPDropdownUI:SetValue(nil)
+    elseif SelectedTotem == "Sundial" then
+        HumanoidRootPart.CFrame = CFrame.new(-1148, 135, -1075)
+        TotemTPDropdownUI:SetValue(nil)
+    elseif SelectedTotem == "Windset" then
+        HumanoidRootPart.CFrame = CFrame.new(2849, 178, 2702)
+        TotemTPDropdownUI:SetValue(nil)
+    elseif SelectedTotem == "Smokescreen" then
+        HumanoidRootPart.CFrame = CFrame.new(2789, 140, -625)
+        TotemTPDropdownUI:SetValue(nil)
+    elseif SelectedTotem == "Tempest" then
+        HumanoidRootPart.CFrame = CFrame.new(35, 133, 1943)
+        TotemTPDropdownUI:SetValue(nil)
+    end
+    end,
+ })
+
+Teleports:CreateSection("Event Teleports")
+Teleports:CreateDropdown({
+    Name = "Select Event",
+    Options = {"Strange Whirlpool", "Great Hammerhead Shark", "Great White Shark", "Whale Shark", "The Depths - Serpent","Golden Tide","Ancient Algae"},
+    CurrentOption = nil,
+    MultipleOptions = false,
+    Callback = function(CurrentOption)
+        SelectedWorldEvent = CurrentOption[1]
+     end,
+})
+Teleports:CreateButton({
+    Name = "Teleport",
+    Callback = function()
+        if SelectedWorldEvent == "Strange Whirlpool" then
+            local offset = Vector3.new(25, 135, 25)
+            local WorldEvent = game.Workspace.zones.fishing:FindFirstChild("Isonade")
+            if not WorldEvent then WorldEventTPDropdownUI:SetValue(nil) return ShowNotification("Not found Strange Whirlpool") end
+            HumanoidRootPart.CFrame = CFrame.new(game.Workspace.zones.fishing.Isonade.Position + offset)                           -- Strange Whirlpool
+            WorldEventTPDropdownUI:SetValue(nil)
+        elseif SelectedWorldEvent == "Great Hammerhead Shark" then
+            local offset = Vector3.new(0, 135, 0)
+            local WorldEvent = game.Workspace.zones.fishing:FindFirstChild("Great Hammerhead Shark")
+            if not WorldEvent then WorldEventTPDropdownUI:SetValue(nil) return ShowNotification("Not found Great Hammerhead Shark") end
+            HumanoidRootPart.CFrame = CFrame.new(game.Workspace.zones.fishing["Great Hammerhead Shark"].Position + offset)         -- Great Hammerhead Shark
+            WorldEventTPDropdownUI:SetValue(nil)
+        elseif SelectedWorldEvent == "Great White Shark" then
+            local offset = Vector3.new(0, 135, 0)
+            local WorldEvent = game.Workspace.zones.fishing:FindFirstChild("Great White Shark")
+            if not WorldEvent then WorldEventTPDropdownUI:SetValue(nil) return ShowNotification("Not found Great White Shark") end
+            HumanoidRootPart.CFrame = CFrame.new(game.Workspace.zones.fishing["Great White Shark"].Position + offset)               -- Great White Shark
+            WorldEventTPDropdownUI:SetValue(nil)
+        elseif SelectedWorldEvent == "Whale Shark" then
+            local offset = Vector3.new(0, 135, 0)
+            local WorldEvent = game.Workspace.zones.fishing:FindFirstChild("Whale Shark")
+            if not WorldEvent then WorldEventTPDropdownUI:SetValue(nil) return ShowNotification("Not found Whale Shark") end
+            HumanoidRootPart.CFrame = CFrame.new(game.Workspace.zones.fishing["Whale Shark"].Position + offset)                     -- Whale Shark
+            WorldEventTPDropdownUI:SetValue(nil)
+        elseif SelectedWorldEvent == "The Depths - Serpent" then
+            local offset = Vector3.new(0, 50, 0)
+            local WorldEvent = game.Workspace.zones.fishing:FindFirstChild("The Depths - Serpent")
+            if not WorldEvent then WorldEventTPDropdownUI:SetValue(nil) return ShowNotification("Not found The Depths - Serpent") end
+            HumanoidRootPart.CFrame = CFrame.new(game.Workspace.zones.fishing["The Depths - Serpent"].Position + offset)            -- The Depths - Serpent
+            WorldEventTPDropdownUI:SetValue(nil)
+        elseif SelectedWorldEvent == "Golden Tide" then
+            local offset = Vector3.new(25, 135, 25)
+            local WorldEvent = game.Workspace.zones.fishing:FindFirstChild("Golden Tide")
+            if not WorldEvent then WorldEventTPDropdownUI:SetValue(nil) return ShowNotification("Not found Eternal Frostwhale") end
+            HumanoidRootPart.CFrame = CFrame.new(game.Workspace.zones.fishing["Golden Tide"].Position + offset)            -- Eternal Frostwhale
+            WorldEventTPDropdownUI:SetValue(nil)
+        elseif SelectedWorldEvent == "Ancient Algae" then
+            local offset = Vector3.new(25, 135, 25)
+            local WorldEvent = game.Workspace.zones.fishing:FindFirstChild("Ancient Algae")
+            if not WorldEvent then WorldEventTPDropdownUI:SetValue(nil) return ShowNotification("Not found Ancient Algae") end
+            HumanoidRootPart.CFrame = CFrame.new(game.Workspace.zones.fishing["Ancient Algae"].Position + offset)            -- Ancient Algae
+            WorldEventTPDropdownUI:SetValue(nil)
+        end
+    end,
+ })
+
+
+ Teleports:CreateSection("Extras")
+ Teleports:CreateButton({
+    Name = "Create Safe Zone",
+    Callback = function()
+        local SafeZone = Instance.new("Part")
+        SafeZone.Size = Vector3.new(30, 1, 30)
+        SafeZone.Position = Vector3.new(math.random(-2000,2000), math.random(50000,90000), math.random(-2000,2000))
+        SafeZone.Anchored = true
+        SafeZone.BrickColor = BrickColor.new("Bright purple")
+        SafeZone.Material = Enum.Material.ForceField
+        SafeZone.Parent = game.Workspace
+        HumanoidRootPart.CFrame = SafeZone.CFrame + Vector3.new(0, 5, 0)
+    end
+ })
+
+
+
+Taiji:CreateSection("Taiji Movement")
+Taiji:CreateToggle({
+    Name = "Walk On Water",
+    CurrentValue = false,
+    Callback = function(Value)
+        for i,v in pairs(workspace.zones.fishing:GetChildren()) do
+            v.CanCollide = Value       
+        end
+    end,
+ })
+
+ Taiji:CreateSlider({
+    Name = "Walk Speed",
+    Range = {0, 500},
+    Increment = 1,
+    CurrentValue = 16,
+    Callback = function(Value)
+        LocalPlayer.Character.Humanoid.WalkSpeed = Value
+    end,
+ })
+
+Taiji:CreateSlider({
+    Name = "Jump Height",
+    Range = {0, 500},
+    Increment = 1,
+    CurrentValue = 50,
+    Callback = function(Value)
+        LocalPlayer.Character.Humanoid.JumpPower = Value
+    end,
+ })
+
+
+Taiji:CreateToggle({
+    Name = "No Clip", 
+    CurrentValue = false,
+    Callback = function(Value)
+        Noclip = Value
+    end,
+})
+
+Taiji:CreateSection("Taiji Vitals")
+Taiji:CreateToggle({
+    Name = "Disable Water Oxygen", 
+    CurrentValue = false,
+    Callback = function(Value)
+        LocalPlayer.Character.client.oxygen.Disabled = Value
+    end,
+})
+
+Taiji:CreateToggle({
+    Name = "Disable Peak Oxygen", 
+    CurrentValue = false,
+    Callback = function(Value)
+        LocalPlayer.Character.client:FindFirstChild("oxygen(peaks)").Disabled = Value
+    end,
+})
+
+Taiji:CreateToggle({
+    Name = "Disable Temperature", 
+    CurrentValue = false,
+    Callback = function(Value)
+        LocalPlayer.Character.client.temperature.Disabled = Value
+    end,
+})
+
+
+Shop:CreateSection("Sell Section")
+Shop:CreateToggle({
+    Name = "Auto sell fisch every 3 minutes",
+    CurrentValue = false,
+    Callback = function(Value)
+        while Value == true do
+            SellAll()
+            wait(180)
+            if not Value then
+                return
+            end
+        end
+    end,
+ })
+
+ Shop:CreateButton({
+    Name = "Sell All",
+    Callback = function()
+        SellAll()
+    end,
+ })
+
+ Shop:CreateSection("Treasure Section")
+ Shop:CreateButton({
+    Name = "Teleport to Jack Marrow",
+    Callback = function()
+        HumanoidRootPart.CFrame = CFrame.new(256,133,59.6)
+    end,
+ })
+
+ Shop:CreateButton({
+    Name = "Repair Map",
+    Callback = function()
+        for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do 
+            if v.Name == "Treasure Map" then
+                game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
+                workspace:WaitForChild("world"):WaitForChild("npcs"):WaitForChild("Jack Marrow"):WaitForChild("treasure"):WaitForChild("repairmap"):InvokeServer()
+            end
+        end
+    end,
+ })
+
+ Shop:CreateButton({
+    Name = "Collect Treasure",
+    Callback = function()
+        for i, v in ipairs(game:GetService("Workspace"):GetDescendants()) do
+            if v.ClassName == "ProximityPrompt" then
+                v.HoldDuration = 0.2
+            end
+        end
+        for i, v in pairs(workspace.world.chests:GetDescendants()) do
+            if v:IsA("Part") and v:FindFirstChild("ChestSetup") then 
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.CFrame
+                for _, v in pairs(workspace.world.chests:GetDescendants()) do
+                    if v.Name == "ProximityPrompt" then
+                        fireproximityprompt(v)
+                    end
+                end
+                task.wait(2)
+            end 
+        end
+    end,
+ })
+
+ local relicAmount = 1
+ local Input = Shop:CreateInput({
+    Name = "Input Amount Of Enchant Relics",
+    CurrentValue = "1",
+    PlaceholderText = "Enter Here",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(Text)
+        local value = tonumber(Text)
+        if value and value > 0 then
+            relicAmount = value
+        else
+            warn("Invalid input! Please enter a positive number.")
+        end
+    end,
+ })
+ Shop:CreateButton({
+    Name = "Purchase Enchant Relics",
+    Callback = function()
+        local holder = relicAmount
+        while holder > 0 do
+            workspace:WaitForChild("world"):WaitForChild("npcs"):WaitForChild("Merlin")
+                :WaitForChild("Merlin"):WaitForChild("power"):InvokeServer()
+            wait(2) 
+            holder -= 1
+        end
+        print("Finished purchasing relics.")
+    end,
+ })
+
+
+while true do
+    elapsed_time = os.difftime(os.time(), start_time) -- Calculate elapsed time
+    timeLabel:Set("Time Elapsed: " .. elapsed_time .. " seconds", "heart", Color3.fromRGB(255, 255, 255), false)
+    wait(1) -- Pause for 1 second
+end
