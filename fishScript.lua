@@ -876,7 +876,7 @@ local function autoShake()
             if not shakeui then return end
             local safezone = shakeui:FindFirstChild("safezone")
             local button = safezone and safezone:FindFirstChild("button")
-            task.wait(0.2)
+            task.wait(0.1)
             GuiService.SelectedObject = button
             if GuiService.SelectedObject == button then
                 VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
@@ -897,6 +897,7 @@ local function autoShake()
             local size = button.AbsoluteSize
             VirtualInputManager:SendMouseButtonEvent(pos.X + size.X / 2, pos.Y + size.Y / 2, 0, true, LocalPlayer, 0)
             VirtualInputManager:SendMouseButtonEvent(pos.X + size.X / 2, pos.Y + size.Y / 2, 0, false, LocalPlayer, 0)
+            task.wait(0.03)
         end,function (err)
         end)
     end
@@ -952,7 +953,7 @@ local function noperfect()
     local playerbar = bar and bar:FindFirstChild("playerbar")
     if playerbar then
         playerbar.Position = UDim2.new(0, 0, -35, 0)
-        wait(0.2)
+        wait(0.5)
     end
 end
 
@@ -968,7 +969,7 @@ local function startAutoReel()
         local bar = reel:FindFirstChild("bar")
         local playerbar = bar and bar:FindFirstChild("playerbar")
         playerbar:GetPropertyChangedSignal('Position'):Wait()
-        game.ReplicatedStorage:WaitForChild("events"):WaitForChild("reelfinished"):FireServer(100, false)
+        game.ReplicatedStorage:WaitForChild("events"):WaitForChild("reelfinished"):FireServer(100, PerfectCatchEnabled)
     end
 end
 
@@ -1113,6 +1114,12 @@ function SellAll()
 end
 
 
+function OfferAll()
+    local offerItemFunction = game:GetService("ReplicatedStorage"):WaitForChild("events"):WaitForChild("offeritem")
+    local result = offerItemFunction:InvokeServer()
+end
+
+
 -- // // // Noclip Stepped // // // --
 NoclipConnection = RunService.Stepped:Connect(function()
     if Noclip == true then
@@ -1142,23 +1149,47 @@ local Options = Fluent.Options
 
 
 do
+
     Tabs.Home:AddButton({
         Title = "Taijitu script tester",
         Description = "",
         Callback = function()
+
             task.spawn(function()
-                game:GetService("ReplicatedStorage").packages.Net["RE/AppraiseAnywhere/GetCost"]:FireServer()                
+                game:GetService("ReplicatedStorage").packages.Net["RE/AppraiseAnywhere/Fire"]:GetChildren()   
+                print(v)             
             end)
+            
         end
     })
 
     
     -- // Taijitu Test Tab // --
     local sectionExclus = Tabs.Taijitu_Additions:AddSection("Taiji Features")
+
+    Tabs.Taijitu_Additions:AddButton({
+        Title = "Offer Item",
+        Description = "",
+        Callback = function()
+            OfferAll()
+        end
+    })
     
 
     -- // Main Tab // --
     local section = Tabs.Main:AddSection("Auto Fishing")
+
+    local ToggleAutoSell = Tabs.Misc:AddToggle("ToggleAutoSell", {Title = "Auto sell fisch every 3 minutes", Default = false })
+    ToggleAutoSell:OnChanged(function()
+        while Options.ToggleAutoSell.Value == true do
+            SellAll()
+            wait(180)
+            if not Options.ToggleAutoSell.Value then
+                return
+            end
+        end
+    end)
+
     local autoCast = Tabs.Main:AddToggle("autoCast", {Title = "Auto Cast", Default = false })
     autoCast:OnChanged(function()
         local RodName = ReplicatedStorage.playerstats[LocalPlayer.Name].Stats.rod.Value
@@ -1367,11 +1398,12 @@ do
 
     -- // Sell Tab // --
     local section = Tabs.Items:AddSection("Sell Items")
-    Tabs.Items:AddButton({
-        Title = "Sell Hand",
+    Tabs.Home:AddButton({
+        Title = "test appraise",
         Description = "",
         Callback = function()
-            SellHand()
+            local value = game:GetService("ReplicatedStorage"):WaitForChild("packages"):WaitForChild("Net"):WaitForChild("RF/AppraiseAnywhere/Fire"):InvokeServer()
+            print(value)
         end
     })
     Tabs.Items:AddButton({
@@ -1387,7 +1419,7 @@ do
     Tabs.Items:AddButton({
         Title = "Teleport to Jack Marrow",
         Callback = function()
-            HumanoidRootPart.CFrame = CFrame.new(-2824.359, 214.311, 1518.130)
+            HumanoidRootPart.CFrame = CFrame.new(256,133,59.6)
         end
     })
     Tabs.Items:AddButton({
@@ -1417,7 +1449,7 @@ do
                             fireproximityprompt(v)
                         end
                     end
-                    task.wait(1)
+                    task.wait(2)
                 end 
             end
         end
@@ -1427,7 +1459,7 @@ do
     local selectedRod = nil -- Variable to store the currently selected rod
 
     local merchantDropdown = Tabs.Items:AddDropdown("MerchantDropdown", {
-        Title = "Merchant Methods",
+        Title = "Select a rod to buy:",
         Values = rodValues,
         Multi = false,
         Default = nil,
@@ -1440,7 +1472,7 @@ do
         Title = "Select Rod",
         Callback = function()
             if selectedRod then
-                local sellAllFunction = game:GetService("ReplicatedStorage").events.purchase:FireServer("Bait Crate", "Crate",1)
+                local sellAllFunction = game:GetService("ReplicatedStorage").events.purchase:FireServer(selectedRod,"Rod")
                 print("Purchased rod:", selectedRod)
             else
                 print("Please select a rod first!")
@@ -1457,6 +1489,13 @@ do
             HumanoidRootPart.CFrame = CFrame.new(-3576.1, 151.2, 525.8)
         end
     })
+    Tabs.Teleports:AddButton({
+        Title = "Teleport to Cryogenic Canal",
+        Callback = function()
+            HumanoidRootPart.CFrame = CFrame.new(20023.6,512.4,5431)
+        end
+    })
+
     local IslandTPDropdownUI = Tabs.Teleports:AddDropdown("IslandTPDropdownUI", {
         Title = "Area Teleport",
         Values = teleportSpots,
@@ -1684,9 +1723,24 @@ do
     end)
 
 
-    local DisableOxygen = Tabs.Misc:AddToggle("DisableOxygen", {Title = "Disable Oxygen", Default = true })
+    local DisableOxygen = Tabs.Misc:AddToggle("DisableOxygen", {Title = "Disable Water Oxygen", Default = false })
     DisableOxygen:OnChanged(function()
         LocalPlayer.Character.client.oxygen.Disabled = Options.DisableOxygen.Value
+    end)
+
+    local DisablePeakOxygen = Tabs.Misc:AddToggle("DisablePeakOxygen", {Title = "Disable Peak Oxygen", Default = false })
+    DisablePeakOxygen:OnChanged(function()
+        local peaksInstance = LocalPlayer.Character.client:FindFirstChild("oxygen(peaks)")
+        if peaksInstance then
+            peaksInstance.Disabled = Options.DisablePeakOxygen.Value
+        else
+            warn("oxygen(peaks) instance not found in client.")
+        end
+    end)
+
+    local DisableTemperature = Tabs.Misc:AddToggle("DisableTemperature", {Title = "Disable Temperature", Default = false })
+    DisableTemperature:OnChanged(function()
+        LocalPlayer.Character.client.temperature.Disabled = Options.DisableTemperature.Value
     end)
 
     local JustUI = Tabs.Misc:AddToggle("JustUI", {Title = "Show/Hide UIs", Default = true })
@@ -1699,6 +1753,32 @@ do
         end
     end)
 
+    local TeleportCoords = Vector3.zero -- Placeholder for teleport coordinates
+
+    -- Input for coordinates
+    local Input = Tabs.Misc:AddInput("Input", {
+        Title = "Enter coords",
+        Numeric = false,
+        Finished = false,
+        Placeholder = "Enter coords (x, y, z)",
+        Callback = function(Value)
+            -- Parse the entered coordinates (e.g., "100, 50, 200")
+            local x, y, z = Value:match("([^,]+),%s*([^,]+),%s*([^,]+)")
+            if x and y and z then
+                TeleportCoords = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
+                print("Parsed coordinates:", TeleportCoords)
+            else
+                warn("Invalid coordinate format. Use 'x, y, z'.")
+            end
+        end
+    })
+
+    Tabs.Misc:AddButton({
+        Title = "Teleport to coords",
+        Callback = function()
+            HumanoidRootPart.CFrame = CFrame.new(TeleportCoords)
+        end
+    })
 
 end
 
