@@ -1576,9 +1576,9 @@ do
             WorldEventTPDropdownUI:SetValue(nil)
         elseif SelectedWorldEvent == "Eternal Frostwhale" then
             local offset = Vector3.new(25, 135, 25)
-            local WorldEvent = game.Workspace.zones.fishing:FindFirstChild("Eternal Frostwhale")
+            local WorldEvent = game.Workspace.zones.fishing:FindFirstChild("Golden Tide")
             if not WorldEvent then WorldEventTPDropdownUI:SetValue(nil) return ShowNotification("Not found Eternal Frostwhale") end
-            HumanoidRootPart.CFrame = CFrame.new(game.Workspace.zones.fishing["Eternal Frostwhale"].Position + offset)            -- Eternal Frostwhale
+            HumanoidRootPart.CFrame = CFrame.new(game.Workspace.zones.fishing["Golden Tide"].Position + offset)            -- Eternal Frostwhale
             WorldEventTPDropdownUI:SetValue(nil)
         elseif SelectedWorldEvent == "Ancient Algae" then
             local offset = Vector3.new(25, 135, 25)
