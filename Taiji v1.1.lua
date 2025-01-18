@@ -84,6 +84,13 @@ table.sort(teleportSpots, function(a, b)
     return a:lower() < b:lower()
 end)
 
+local rodValues = {}
+
+for rodName, _ in pairs(rodsConst) do
+    table.insert(rodValues, rodName)
+end
+
+
 -- // // // Functions // // // --
 function ShowNotification(String)
     Fluent:Notify({
@@ -685,7 +692,7 @@ Teleports:CreateButton({
      Name = "Enter coords",
      CurrentValue = "",
      PlaceholderText = "Enter coords x, y, z",
-     RemoveTextAfterFocusLost = false",
+     RemoveTextAfterFocusLost = false,
      Callback = function(Text)
          -- Parse the entered coordinates (e.g., "100, 50, 200")
          local x, y, z = Value:match("([^,]+),%s*([^,]+),%s*([^,]+)")
@@ -698,14 +705,12 @@ Teleports:CreateButton({
      end,
  })
 
- Tabs.Misc:AddButton({
-     Title = "Teleport to coords",
+Teleports:CreateButton({
+     Name = "Teleport to coords",
      Callback = function()
          HumanoidRootPart.CFrame = CFrame.new(TeleportCoords)
-     end
+     end,
  })
-
-end
 
 
 
@@ -797,6 +802,37 @@ Shop:CreateToggle({
     end,
  })
 
+ Shop:CreateButton({
+    Name = "Sell Hand",
+    Callback = function()
+        SellHand()
+    end,
+ })
+
+
+ -- // // BUY SELECTED ROD SECTION // // --
+Shop:CreateSection("Purchase Rods")
+
+local selectedRod = nil 
+Shop:CreateDropdown({
+    Name = "Select Rod",
+    Options = rodValues,
+    CurrentOption = nil,
+    MultipleOptions = false,
+    Callback = function(CurrentOption)
+        selectedRod = CurrentOption[1]
+    end,
+})
+
+Shop:CreateButton({
+    Name = "Purchase Rod",
+    Callback = function()
+        game:GetService("ReplicatedStorage").events.purchase:FireServer(selectedRod,"Rod")
+    end,
+})
+
+
+-- // // TREASURE MAP // // --
  Shop:CreateSection("Treasure Section")
  Shop:CreateButton({
     Name = "Teleport to Jack Marrow",
