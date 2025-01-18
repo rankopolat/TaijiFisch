@@ -357,7 +357,7 @@ local autoFish = Main:CreateToggle({
 
 local autoFish = Main:CreateToggle({
     Name = "Auto Shake",
-    CurrentValue = false,
+    CurrentValue = true,
     Flag = "Toggle2",
     Callback = function(Value)
         if Value == true then
@@ -372,7 +372,7 @@ local autoFish = Main:CreateToggle({
 
  local autoFish = Main:CreateToggle({
     Name = "Auto Reel",
-    CurrentValue = false,
+    CurrentValue = true,
     Flag = "Toggle3",
     Callback = function(Value)
         if Value == true then
@@ -613,6 +613,7 @@ Teleports:CreateDropdown({
         SelectedWorldEvent = CurrentOption[1]
      end,
 })
+
 Teleports:CreateButton({
     Name = "Teleport",
     Callback = function()
@@ -677,6 +678,34 @@ Teleports:CreateButton({
         HumanoidRootPart.CFrame = SafeZone.CFrame + Vector3.new(0, 5, 0)
     end
  })
+
+ local TeleportCoords = Vector3.zero -- Placeholder for teleport coordinates
+
+ local Input = Teleports:CreateInput({
+     Name = "Enter coords",
+     CurrentValue = "",
+     PlaceholderText = "Enter coords x, y, z",
+     RemoveTextAfterFocusLost = false",
+     Callback = function(Text)
+         -- Parse the entered coordinates (e.g., "100, 50, 200")
+         local x, y, z = Value:match("([^,]+),%s*([^,]+),%s*([^,]+)")
+         if x and y and z then
+             TeleportCoords = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
+             print("Parsed coordinates:", TeleportCoords)
+         else
+             warn("Invalid coordinate format. Use 'x, y, z'.")
+         end
+     end,
+ })
+
+ Tabs.Misc:AddButton({
+     Title = "Teleport to coords",
+     Callback = function()
+         HumanoidRootPart.CFrame = CFrame.new(TeleportCoords)
+     end
+ })
+
+end
 
 
 
