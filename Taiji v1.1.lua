@@ -30,7 +30,7 @@ local Home = Window:CreateTab("Home","home")
 local Main = Window:CreateTab("Auto","list")
 local Taiji = Window:CreateTab("Taiji","heart")
 local Shop = Window:CreateTab("Shop","box")
-local Teleports = Window:CreateTab("Teleports","map-pin")
+local Teleports = Window:CreateTab("Tp","map-pin")
 local Misc = Window:CreateTab("Misc","file-text")
 
 -- // // // Services // // // --
@@ -613,7 +613,7 @@ Teleports:CreateButton({
 Teleports:CreateSection("Event Teleports")
 Teleports:CreateDropdown({
     Name = "Select Event",
-    Options = {"Strange Whirlpool", "Great Hammerhead Shark", "Great White Shark", "Whale Shark", "The Depths - Serpent","Golden Tide","Ancient Algae"},
+    Options = {"Strange Whirlpool", "Great Hammerhead Shark", "Great White Shark", "Whale Shark", "The Depths - Serpent","Golden Tide","Sunken Chests"},
     CurrentOption = nil,
     MultipleOptions = false,
     Callback = function(CurrentOption)
@@ -660,11 +660,11 @@ Teleports:CreateButton({
             if not WorldEvent then WorldEventTPDropdownUI:SetValue(nil) return ShowNotification("Not found Eternal Frostwhale") end
             HumanoidRootPart.CFrame = CFrame.new(game.Workspace.zones.fishing["Golden Tide"].Position + offset)            -- Eternal Frostwhale
             WorldEventTPDropdownUI:SetValue(nil)
-        elseif SelectedWorldEvent == "Ancient Algae" then
+        elseif SelectedWorldEvent == "Sunken Chests" then
             local offset = Vector3.new(25, 135, 25)
-            local WorldEvent = game.Workspace.zones.fishing:FindFirstChild("Ancient Algae")
+            local WorldEvent = game.Workspace.zones.fishing:FindFirstChild("Sunken Chests")
             if not WorldEvent then WorldEventTPDropdownUI:SetValue(nil) return ShowNotification("Not found Ancient Algae") end
-            HumanoidRootPart.CFrame = CFrame.new(game.Workspace.zones.fishing["Ancient Algae"].Position + offset)            -- Ancient Algae
+            HumanoidRootPart.CFrame = CFrame.new(game.Workspace.zones.fishing["Sunken Chests"].Position + offset)            -- Sunken Chests
             WorldEventTPDropdownUI:SetValue(nil)
         end
     end,
@@ -903,6 +903,13 @@ Shop:CreateButton({
         print("Finished purchasing relics.")
     end,
  })
+
+ Shop:CreateButton({
+    Name = "Appraise Item",
+    Callback = function()
+        workspace:WaitForChild("world"):WaitForChild("npcs"):WaitForChild("Appraiser"):WaitForChild("appraiser"):WaitForChild("appraise"):InvokeServer()
+    end,
+})
 
 
 while true do

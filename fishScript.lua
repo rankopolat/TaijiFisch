@@ -1030,7 +1030,6 @@ ZoneConnection = LocalCharacter.ChildAdded:Connect(function(child)
     end
 end)
 
-
 local backValues = {}
 -- // Show Backpack Item Names == 
 for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do 
