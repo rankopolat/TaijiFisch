@@ -73,6 +73,26 @@ local BypassGpsLoop = nil
 local Noclip = false
 local RunCount = false
 
+
+-- // TAIJITU TAB // --
+
+local Lighting = game:GetService("Lighting")
+
+-- Function to convert "HH:MM:SS" to total seconds
+local function timeToSeconds(timeString)
+    local hours, minutes, seconds = timeString:match("(%d+):(%d+):(%d+)")
+    return tonumber(hours) * 3600 + tonumber(minutes) * 60 + tonumber(seconds)
+end
+
+-- Function to check if TimeOfDay is within a range
+local function isTimeBetween(startTime, endTime)
+    local currentSeconds = timeToSeconds(Lighting.TimeOfDay)
+    local startSeconds = timeToSeconds(startTime)
+    local endSeconds = timeToSeconds(endTime)
+    return currentSeconds >= startSeconds and currentSeconds <= endSeconds
+end
+
+
 -- // TABLE FILLER // --
 for i, v in pairs(TpSpotsFolder:GetChildren()) do
     if table.find(teleportSpots, v.Name) == nil then
@@ -310,8 +330,6 @@ function Enchant()
     game:GetService("ReplicatedStorage"):WaitForChild("events"):WaitForChild("enchant"):InvokeServer()
 end
 
-local timeLabel = Home:CreateLabel(elapsed_time, "heart", Color3.fromRGB(255, 255, 255), false)
-
 -- // // // // // AUTO FISH SECTION // // // // // --
 local autoFishSection = Main:CreateSection("Auto Fishing Toggles")
 local autoFish = Main:CreateToggle({
@@ -445,24 +463,61 @@ local Dropdown = Main:CreateDropdown({
 
 local autoFishSection = Main:CreateSection("Auto Totems")
 
-local autoSundial = Main:CreateToggle({
-    Name = "Auto Sundial Totem",
+
+ local autoSundial = Main:CreateToggle({
+    Name = "Auto Night Sundial",
     CurrentValue = false,
     Callback = function(Value)
         while Value do
+
+            while isTimeBetween("18:00:00", "24:00:00") or isTimeBetween("00:00:00", "06:05:00") do
+                wait(3)
+            end
+
             for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
                 if v.Name == "Sundial Totem" then
-                    -- Equip the Sundial Totem if found
                     game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
                     VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, LocalPlayer, 0)
                     break
                 end
             end
 
-            task.wait(25)
+            if not Value then
+                return
+            end
+            
         end   
     end,
  })
+
+ local autoSundial = Main:CreateToggle({
+    Name = "Auto Day Sundial",
+    CurrentValue = false,
+    Callback = function(Value)
+        while Value do
+
+            while isTimeBetween("06:00:00", "18:00:00") do
+                wait(3)
+            end
+
+            for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                if v.Name == "Sundial Totem" then
+                    game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
+                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, LocalPlayer, 0)
+                    break
+                end
+            end
+
+            wait(1)
+
+            if not Value then
+                return
+            end
+            
+        end   
+    end,
+ })
+
 
 local autoAuroraSun = Main:CreateToggle({
     Name = "Auto Aurora Totem",
@@ -470,31 +525,52 @@ local autoAuroraSun = Main:CreateToggle({
     Callback = function(Value)
         while Value do
 
-            autoCastEnabled = false;
-            task.wait(5)
-
             -- Check if the "Sundial Totem" exists in the player's backpack
-            for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-                if v.Name == "Sundial Totem" then
-                    -- Equip the Sundial Totem if found
-                    game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
-                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, LocalPlayer, 0)
+            while isTimeBetween("06:00:00", "18:00:00") do
+
+                if not isTimeBetween("06:00:00", "18:00:00") then
                     break
                 end
+
+                local RodName = ReplicatedStorage.playerstats[LocalPlayer.Name].Stats.rod.Value
+                if LocalPlayer.Backpack:FindFirstChild(RodName) then
+                    LocalPlayer.Character.Humanoid:EquipTool(LocalPlayer.Backpack:FindFirstChild(RodName))
+                end
+
+                task.wait(1)
+
+                for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                    if v.Name == "Sundial Totem" then
+                        -- Equip the Sundial Totem if found
+                        game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
+                        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, LocalPlayer, 0)
+                        break
+                    end
+                end
+
+                task.wait(1)
             end
 
-            task.wait(25)
+            task.wait(1)
 
-            for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-                if v.Name == "Aurora Totem" then
-                    -- Equip the Sundial Totem if found
-                    game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
-                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, LocalPlayer, 0)
+            while isTimeBetween("18:00:00", "18:15:00") do
+
+                if not isTimeBetween("06:00:00", "18:15:00") then
                     break
                 end
-            end
 
-            task.wait(5)
+                for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                    if v.Name == "Aurora Totem" then
+                        -- Equip the Sundial Totem if found
+                        game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
+                        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, LocalPlayer, 0)
+                        break
+                    end
+                end
+                task.wait(1)
+
+            end
+    
 
             local RodName = ReplicatedStorage.playerstats[LocalPlayer.Name].Stats.rod.Value
             autoCastEnabled = true
@@ -517,14 +593,24 @@ local autoAuroraSun = Main:CreateToggle({
                 task.wait(1)
             end
             
+
             while not isTimeBetween("06:00:00", "07:00:00") do
-                task.wait(1) -- Check every second
+                task.wait(1)
+                if isTimeBetween("06:00:00", "07:00:00") then
+                    break
+                end
             end
 
             autoCastEnabled = false;
 
         end
+
         autoCastEnabled = false;
+
+        if not Value then
+            return
+        end
+
     end,
  })
 
@@ -875,6 +961,7 @@ Shop:CreateButton({
     end,
  })
 
+ Shop:CreateSection("Enchant Section")
  local relicAmount = 1
  local Input = Shop:CreateInput({
     Name = "Input Amount Of Enchant Relics",
@@ -904,16 +991,36 @@ Shop:CreateButton({
     end,
  })
 
+ Shop:CreateToggle({
+    Name = "Enchant Item",
+    CurrentValue = false,
+    Callback = function(Value)
+        while Value == true do
+            for i, v in ipairs(game:GetService("Workspace"):GetDescendants()) do
+                if v.ClassName == "ProximityPrompt" then
+                    v.HoldDuration = 0
+                end
+            end
+    
+            for _, v in pairs(workspace.world.interactables:GetDescendants()) do
+                if v.Name == "ProximityPrompt" then
+                    fireproximityprompt(v)
+                    v.Enabled = true
+                    break
+                end
+            end
+            wait(1)
+            if not Value then
+                return
+            end
+        end
+    end,
+ })
+
+Shop:CreateSection("Appraise Section")
  Shop:CreateButton({
     Name = "Appraise Item",
     Callback = function()
         workspace:WaitForChild("world"):WaitForChild("npcs"):WaitForChild("Appraiser"):WaitForChild("appraiser"):WaitForChild("appraise"):InvokeServer()
     end,
 })
-
-
-while true do
-    elapsed_time = os.difftime(os.time(), start_time) -- Calculate elapsed time
-    timeLabel:Set("Time Elapsed: " .. elapsed_time .. " seconds", "heart", Color3.fromRGB(255, 255, 255), false)
-    wait(1) -- Pause for 1 second
-end
