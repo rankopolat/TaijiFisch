@@ -528,7 +528,8 @@ local autoAuroraSun = Main:CreateToggle({
             -- Check if the "Sundial Totem" exists in the player's backpack
             while isTimeBetween("06:00:00", "18:00:00") do
 
-                if not isTimeBetween("06:00:00", "18:00:00") then
+                if not isTimeBetween("06:00:00", "17:00:00") then
+                    wait(2)
                     break
                 end
 
@@ -550,8 +551,6 @@ local autoAuroraSun = Main:CreateToggle({
 
                 task.wait(1)
             end
-
-            task.wait(1)
 
             while isTimeBetween("18:00:00", "18:15:00") do
 
@@ -598,6 +597,9 @@ local autoAuroraSun = Main:CreateToggle({
                 task.wait(1)
                 if isTimeBetween("06:00:00", "07:00:00") then
                     break
+                end
+                if not Value then
+                    return
                 end
             end
 
