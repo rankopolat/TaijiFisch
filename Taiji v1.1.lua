@@ -1018,11 +1018,3 @@ Shop:CreateButton({
         end
     end,
  })
-
-Shop:CreateSection("Appraise Section")
- Shop:CreateButton({
-    Name = "Appraise Item",
-    Callback = function()
-        workspace:WaitForChild("world"):WaitForChild("npcs"):WaitForChild("Appraiser"):WaitForChild("appraiser"):WaitForChild("appraise"):InvokeServer()
-    end,
-})
