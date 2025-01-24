@@ -1018,3 +1018,34 @@ Shop:CreateButton({
         end
     end,
  })
+
+
+
+ Shop:CreateSection("Misc Tools")
+
+ Shop:CreateToggle({
+    Name = "GPS",
+    CurrentValue = false,
+    Callback = function(Value)
+        if Value == true then
+            local XyzClone = game:GetService("ReplicatedStorage").resources.items.items.GPS.GPS.gpsMain.xyz:Clone()
+			XyzClone.Parent = game.Players.LocalPlayer.PlayerGui:WaitForChild("hud"):WaitForChild("safezone"):WaitForChild("backpack")
+			local Pos = GetPosition()
+			local StringInput = string.format("%s, %s, %s", ExportValue(Pos[1]), ExportValue(Pos[2]), ExportValue(Pos[3]))
+			XyzClone.Text = "<font color='#ff4949'>X</font><font color = '#a3ff81'>Y</font><font color = '#626aff'>Z</font>: "..StringInput
+			BypassGpsLoop = game:GetService("RunService").Heartbeat:Connect(function()
+				local Pos = GetPosition()
+				StringInput = string.format("%s, %s, %s", ExportValue(Pos[1]), ExportValue(Pos[2]), ExportValue(Pos[3]))
+				XyzClone.Text = "<font color='#ff4949'>X</font><font color = '#a3ff81'>Y</font><font color = '#626aff'>Z</font> : "..StringInput
+			end)
+		else
+			if PlayerGui.hud.safezone.backpack:FindFirstChild("xyz") then
+				PlayerGui.hud.safezone.backpack:FindFirstChild("xyz"):Destroy()
+			end
+			if BypassGpsLoop then
+				BypassGpsLoop:Disconnect()
+				BypassGpsLoop = nil
+			end
+        end
+    end,
+ })
