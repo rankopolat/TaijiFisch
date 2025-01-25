@@ -1065,3 +1065,21 @@ Shop:CreateButton({
         end
     end,
  })
+
+ Misc:CreateToggle({
+    Name = "Permanent Day",
+    CurrentValue = false,
+    Callback = function(Value)
+        if Value == true then
+            DayOnlyLoop = RunService.Heartbeat:Connect(function()
+				game:GetService("Lighting").TimeOfDay = "12:00:00"
+			end)
+		else
+			if DayOnlyLoop then
+				DayOnlyLoop:Disconnect()
+				DayOnlyLoop = nil
+			end
+        end
+    end,
+ })
+
