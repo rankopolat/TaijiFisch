@@ -1021,9 +1021,9 @@ Shop:CreateButton({
 
 
 
- Shop:CreateSection("Misc Tools")
+ Misc:CreateSection("Misc Tools")
 
- Shop:CreateToggle({
+ Misc:CreateToggle({
     Name = "GPS",
     CurrentValue = false,
     Callback = function(Value)
