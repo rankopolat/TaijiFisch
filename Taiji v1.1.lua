@@ -1049,3 +1049,19 @@ Shop:CreateButton({
         end
     end,
  })
+
+ Misc:CreateToggle({
+    Name = "Remove Fog",
+    CurrentValue = false,
+    Callback = function(Value)
+        if Value == true then
+            if game:GetService("Lighting"):FindFirstChild("Sky") then
+                game:GetService("Lighting"):FindFirstChild("Sky").Parent = game:GetService("Lighting").bloom
+            end
+        else
+            if game:GetService("Lighting").bloom:FindFirstChild("Sky") then
+                game:GetService("Lighting").bloom:FindFirstChild("Sky").Parent = game:GetService("Lighting")
+            end
+        end
+    end,
+ })
